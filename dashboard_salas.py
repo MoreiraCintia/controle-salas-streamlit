@@ -73,7 +73,7 @@ def gerar_controle_de_salas():
 df = gerar_controle_de_salas()
 
 # 🎨 Interface do Streamlit
-st.title("📊 Controle de Ocupação das Salas")
+st.title("📊 Controle das Salas")
 
 # 📍 Filtros independentes
 col1, col2 = st.columns(2)
