@@ -127,6 +127,7 @@ with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
 output.seek(0)
 
 import io
+st.set_page_config(layout="wide"
 
 # Gera um arquivo Excel em memória
 output = io.BytesIO()
