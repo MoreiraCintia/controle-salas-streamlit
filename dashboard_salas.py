@@ -4,6 +4,8 @@ import io
 from openpyxl import load_workbook
 from datetime import datetime, timedelta
 
+st.set_page_config(layout="wide")
+                   
 # 📁 Caminho do seu arquivo
 ARQUIVO_EXCEL = "Planejamento e Custos - 2025.xlsm"
 
@@ -127,7 +129,6 @@ with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
 output.seek(0)
 
 import io
-st.set_page_config(layout="wide"
 
 # Gera um arquivo Excel em memória
 output = io.BytesIO()
