@@ -3,9 +3,7 @@ import streamlit as st
 import io
 from openpyxl import load_workbook
 from datetime import datetime, timedelta
-
-st.set_page_config(layout="wide")
-                   
+                 
 # 📁 Caminho do seu arquivo
 ARQUIVO_EXCEL = "Planejamento e Custos - 2025.xlsm"
 
