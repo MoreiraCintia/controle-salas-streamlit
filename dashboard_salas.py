@@ -5,7 +5,7 @@ from openpyxl import load_workbook
 from datetime import datetime, timedelta
 
 # 📁 Caminho do seu arquivo
-ARQUIVO_EXCEL = r"\\SVR-ANMOURA\Secretaria\Secretaria\Cursos 2025\Planejamento\Planejamento e Custos - 2025.xlsm"
+ARQUIVO_EXCEL = Planejamento e Custos - 2025.xlsm
 
 # 🎯 Função para extrair os dados da aba Planejamento e montar o controle de salas
 @st.cache_data
