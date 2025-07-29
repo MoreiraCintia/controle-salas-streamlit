@@ -41,8 +41,7 @@ def gerar_controle_de_salas():
                     "Sala": sala,
                     "Período": periodo,
                     "Curso": curso,
-                    "Status": "Ocupado",
-                    "Dia da semana": data_atual.strftime("%A")
+                    "Status": "Ocupado"
                 })
             data_atual += timedelta(days=1)
 
