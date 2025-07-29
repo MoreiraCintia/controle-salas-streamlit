@@ -15,15 +15,6 @@ def gerar_controle_de_salas():
 
     dados = []
     dias_semana_col = {0: 'I', 1: 'J', 2: 'K', 3: 'L', 4: 'M'}  # Segunda a sexta
-    dias_pt = {
-        "Monday": "Segunda-feira",
-        "Tuesday": "Terça-feira",
-        "Wednesday": "Quarta-feira",
-        "Thursday": "Quinta-feira",
-        "Friday": "Sexta-feira",
-        "Saturday": "Sábado",
-        "Sunday": "Domingo"
-    }
 
     for row in range(2, ws.max_row + 1):
         curso = ws[f"B{row}"].value
@@ -47,7 +38,6 @@ def gerar_controle_de_salas():
             if dia_semana_idx < 5 and str(dias_x[dia_semana_idx]).strip().lower() == 'x':
                 dados.append({
                     "Data": data_atual,
-                    "Dia da Semana": dias_pt[data_atual.strftime("%A")],
                     "Sala": sala,
                     "Período": periodo,
                     "Curso": curso,
@@ -64,13 +54,13 @@ def gerar_controle_de_salas():
     for data in datas:
         for sala in salas:
             for periodo in periodos:
+                # Verifica se essa combinação já está ocupada
                 encontrado = next((d for d in dados if d["Data"] == data and d["Sala"] == sala and d["Período"] == periodo), None)
                 if encontrado:
                     combinacoes.append(encontrado)
                 else:
                     combinacoes.append({
                         "Data": data,
-                        "Dia da Semana": dias_pt[data.strftime("%A")],
                         "Sala": sala,
                         "Período": periodo,
                         "Curso": "",
@@ -88,6 +78,7 @@ st.title("📊 Controle das Salas")
 # 📍 Filtros independentes
 col1, col2 = st.columns(2)
 
+# Obtemos a menor e maior data do DataFrame
 data_min = df["Data"].min().date()
 data_max = df["Data"].max().date()
 
@@ -97,18 +88,16 @@ with col1:
 with col2:
     status_filtro = st.selectbox("📌 Status", options=["Todos", "Livre", "Ocupado"])
 
+
 col3, col4 = st.columns(2)
 with col3:
     sala_filtro = st.selectbox("🏫 Sala", options=["Todas"] + sorted(df["Sala"].unique().tolist()))
 with col4:
     periodo_filtro = st.selectbox("⏰ Período", options=["Todos"] + ["Manhã", "Tarde", "Noite"])
 
-col5 = st.columns(1)[0]
-with col5:
-    dia_filtro = st.selectbox("📅 Dia da Semana", options=["Todos"] + df["Dia da Semana"].unique().tolist())
-
 # 🎯 Aplica filtros
 filtro = df.copy()
+# Aplica filtro de período (se ambas datas forem escolhidas)
 if datas_filtro and all(datas_filtro):
     inicio, fim = datas_filtro
     filtro = filtro[(filtro["Data"] >= pd.to_datetime(inicio)) & (filtro["Data"] <= pd.to_datetime(fim))]
@@ -118,14 +107,18 @@ if sala_filtro != "Todas":
     filtro = filtro[filtro["Sala"] == sala_filtro]
 if periodo_filtro != "Todos":
     filtro = filtro[filtro["Período"] == periodo_filtro]
-if dia_filtro != "Todos":
-    filtro = filtro[filtro["Dia da Semana"] == dia_filtro]
 
-# Cria uma cópia para exibição com data formatada
+filtro["Data"] = pd.to_datetime(filtro["Data"], errors="coerce").dt.strftime("%d/%m/%Y")
+
+
+# 🧾 Resultado
+filtro["Data"] = pd.to_datetime(filtro["Data"], errors="coerce").dt.strftime("%d/%m/%Y")
+# Cria uma cópia apenas para exibição, com a coluna "Data" formatada
 df_exibicao = filtro.copy()
 df_exibicao["Data"] = pd.to_datetime(df_exibicao["Data"]).dt.strftime("%d/%m/%Y")
 
 st.dataframe(df_exibicao.sort_values(["Data", "Sala", "Período"]))
+
 
 # Gera um arquivo Excel em memória
 output = io.BytesIO()
@@ -133,7 +126,15 @@ with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
     filtro.to_excel(writer, index=False, sheet_name="Controle de Salas")
 output.seek(0)
 
-# Botão para download
+import io
+
+# Gera um arquivo Excel em memória
+output = io.BytesIO()
+with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+    filtro.to_excel(writer, index=False, sheet_name="Controle de Salas")
+output.seek(0)
+
+# Botão para download do Excel
 st.download_button(
     label="📥 Baixar como Excel",
     data=output,
