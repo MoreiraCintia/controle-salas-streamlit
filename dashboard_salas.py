@@ -41,7 +41,8 @@ def gerar_controle_de_salas():
                     "Sala": sala,
                     "Período": periodo,
                     "Curso": curso,
-                    "Status": "Ocupado"
+                    "Status": "Ocupado",
+                    "Dia da semana": data_atual.strftime("%A")
                 })
             data_atual += timedelta(days=1)
 
@@ -88,45 +89,49 @@ with col1:
 with col2:
     status_filtro = st.selectbox("📌 Status", options=["Todos", "Livre", "Ocupado"])
 
-
 col3, col4 = st.columns(2)
 with col3:
     sala_filtro = st.selectbox("🏫 Sala", options=["Todas"] + sorted(df["Sala"].unique().tolist()))
 with col4:
     periodo_filtro = st.selectbox("⏰ Período", options=["Todos"] + ["Manhã", "Tarde", "Noite"])
 
+# 🗓️ Novo filtro por dia da semana
+dias_semana = ["Todos", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira"]
+dia_filtro = st.selectbox("📅 Dia da Semana", options=dias_semana)
+
 # 🎯 Aplica filtros
 filtro = df.copy()
-# Aplica filtro de período (se ambas datas forem escolhidas)
+
 if datas_filtro and all(datas_filtro):
     inicio, fim = datas_filtro
     filtro = filtro[(filtro["Data"] >= pd.to_datetime(inicio)) & (filtro["Data"] <= pd.to_datetime(fim))]
+
 if status_filtro != "Todos":
     filtro = filtro[filtro["Status"] == status_filtro]
+
 if sala_filtro != "Todas":
     filtro = filtro[filtro["Sala"] == sala_filtro]
+
 if periodo_filtro != "Todos":
     filtro = filtro[filtro["Período"] == periodo_filtro]
 
-filtro["Data"] = pd.to_datetime(filtro["Data"], errors="coerce").dt.strftime("%d/%m/%Y")
-
+# Filtro por dia da semana
+dias_dict = {
+    "Segunda-feira": "Monday",
+    "Terça-feira": "Tuesday",
+    "Quarta-feira": "Wednesday",
+    "Quinta-feira": "Thursday",
+    "Sexta-feira": "Friday"
+}
+if dia_filtro != "Todos":
+    filtro = filtro[filtro["Dia da Semana"] == dias_dict[dia_filtro]]
 
 # 🧾 Resultado
 filtro["Data"] = pd.to_datetime(filtro["Data"], errors="coerce").dt.strftime("%d/%m/%Y")
-# Cria uma cópia apenas para exibição, com a coluna "Data" formatada
 df_exibicao = filtro.copy()
 df_exibicao["Data"] = pd.to_datetime(df_exibicao["Data"]).dt.strftime("%d/%m/%Y")
 
 st.dataframe(df_exibicao.sort_values(["Data", "Sala", "Período"]))
-
-
-# Gera um arquivo Excel em memória
-output = io.BytesIO()
-with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-    filtro.to_excel(writer, index=False, sheet_name="Controle de Salas")
-output.seek(0)
-
-import io
 
 # Gera um arquivo Excel em memória
 output = io.BytesIO()
